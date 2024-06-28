@@ -5,5 +5,5 @@ import org.springframework.data.repository.ListCrudRepository;
 
 public interface TaskMongoRepository extends ListCrudRepository<TaskDocument, String> {
 
-  List<TaskDocument> findByUserId(String userId);
+  List<TaskDocument> findByUserUserId(String userId);
 }

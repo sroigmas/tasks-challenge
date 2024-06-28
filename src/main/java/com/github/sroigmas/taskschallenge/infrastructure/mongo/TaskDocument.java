@@ -3,13 +3,12 @@ package com.github.sroigmas.taskschallenge.infrastructure.mongo;
 import com.github.sroigmas.taskschallenge.domain.TaskStatus;
 import java.time.LocalDateTime;
 import java.util.Set;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document
 public class TaskDocument {
 
-  @Indexed private String userId;
+  private UserDocument user;
 
   private String title;
 
@@ -24,13 +23,13 @@ public class TaskDocument {
   public TaskDocument() {}
 
   public TaskDocument(
-      String userId,
+      UserDocument user,
       String title,
       String description,
       LocalDateTime dueDate,
       Set<String> tags,
       TaskStatus status) {
-    this.userId = userId;
+    this.user = user;
     this.title = title;
     this.description = description;
     this.dueDate = dueDate;
@@ -38,12 +37,12 @@ public class TaskDocument {
     this.status = status;
   }
 
-  public String getUserId() {
-    return userId;
+  public UserDocument getUser() {
+    return user;
   }
 
-  public void setUserId(String userId) {
-    this.userId = userId;
+  public void setUser(UserDocument user) {
+    this.user = user;
   }
 
   public String getTitle() {

@@ -21,7 +21,7 @@ public class TaskDbRepository implements TaskRepository {
   public Task saveTask(Task task) {
     TaskDocument taskDocument =
         new TaskDocument(
-            task.user().userId().toString(),
+            new UserDocument(task.user().userId().toString()),
             task.title(),
             task.description(),
             task.dueDate(),
@@ -31,7 +31,7 @@ public class TaskDbRepository implements TaskRepository {
     TaskDocument savedTaskDocument = taskMongoRepository.save(taskDocument);
 
     return new Task(
-        new User(UUID.fromString(savedTaskDocument.getUserId())),
+        new User(UUID.fromString(savedTaskDocument.getUser().getUserId())),
         savedTaskDocument.getTitle(),
         savedTaskDocument.getDescription(),
         savedTaskDocument.getDueDate(),
@@ -41,11 +41,11 @@ public class TaskDbRepository implements TaskRepository {
 
   @Override
   public List<Task> findTasksByUserId(UUID userId) {
-    return taskMongoRepository.findByUserId(userId.toString()).stream()
+    return taskMongoRepository.findByUserUserId(userId.toString()).stream()
         .map(
             taskDocument ->
                 new Task(
-                    new User(UUID.fromString(taskDocument.getUserId())),
+                    new User(UUID.fromString(taskDocument.getUser().getUserId())),
                     taskDocument.getTitle(),
                     taskDocument.getDescription(),
                     taskDocument.getDueDate(),
