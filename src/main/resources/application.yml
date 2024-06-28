@@ -4,5 +4,3 @@ spring:
   data:
     mongodb:
       auto-index-creation: true
-  jackson:
-    property-naming-strategy: SNAKE_CASE

@@ -1,18 +1,18 @@
 package com.github.sroigmas.taskschallenge;
 
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.context.annotation.Bean;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.utility.DockerImageName;
 
-@TestConfiguration(proxyBeanMethods = false)
-class TestcontainersConfiguration {
+public interface TestcontainersConfiguration {
 
-  @Bean
-  @ServiceConnection
-  MongoDBContainer mongoDbContainer() {
-    return new MongoDBContainer(DockerImageName.parse("mongo:latest"));
+  @Container
+  MongoDBContainer mongoDbContainer = new MongoDBContainer(DockerImageName.parse("mongo:latest"));
+
+  @DynamicPropertySource
+  static void setProperties(DynamicPropertyRegistry properties) {
+    properties.add("spring.data.mongodb.uri", mongoDbContainer::getReplicaSetUrl);
   }
-
 }
