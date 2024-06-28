@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -88,5 +89,49 @@ class TaskControllerIT {
     assertEquals(taskRequest.dueDate(), tasks.getFirst().getDueDate());
     assertEquals(taskRequest.tags().get(), tasks.getFirst().getTags());
     assertEquals(TaskStatus.PENDING, tasks.getFirst().getStatus());
+  }
+
+  @Test
+  void givenUserId_whenListingTasks_thenReturnsTasks() throws Exception {
+    TaskRequest taskRequest =
+        new TaskRequest(
+            UUID.randomUUID(),
+            "My task",
+            "This is my task",
+            LocalDateTime.of(2025, 6, 28, 12, 0),
+            Optional.of(Set.of("tag1", "tag2")));
+
+    mvc.perform(
+            post("/api/v1/tasks")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(taskRequest)))
+        .andDo(print())
+        .andExpect(status().isCreated());
+
+    ResultActions result =
+        mvc.perform(
+                get("/api/v1/tasks")
+                    .param("user_id", taskRequest.userId().toString())
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andDo(print());
+
+    result
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", hasSize(1)))
+        .andExpect(jsonPath("$[0].user_id").value(taskRequest.userId().toString()))
+        .andExpect(jsonPath("$[0].title").value(taskRequest.title()))
+        .andExpect(jsonPath("$[0].description").value(taskRequest.description()))
+        .andExpect(
+            jsonPath("$[0].due_date")
+                .value(
+                    taskRequest
+                        .dueDate()
+                        .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))))
+        .andExpect(jsonPath("$[0].tags", hasSize(taskRequest.tags().get().size())))
+        .andExpect(
+            jsonPath("$[0].tags", hasItem(taskRequest.tags().get().stream().toList().get(0))))
+        .andExpect(
+            jsonPath("$[0].tags", hasItem(taskRequest.tags().get().stream().toList().get(1))))
+        .andExpect(jsonPath("$[0].status").value(TaskStatus.PENDING.name()));
   }
 }
